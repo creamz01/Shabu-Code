@@ -10,65 +10,39 @@ import {
 // Import Styles
 import { styles } from './styles'; 
 
-// ข้อมูลเมนู (จำลองจากรูปภาพ)
+// ข้อมูลเมนูสำหรับ Standard
 const MENU_DATA = {
   Standard: {
     Meat: [
-      { name: 'Short rib', image: require('./pic/short_rib.jpg') },
-      { name: 'Sirloin', image: require('./pic/sirloin.jpg') },
-      { name: 'Oyster Blade', image: require('./pic/oyster_blade.jpg') },
-      { name: 'Tongue Slice', image: require('./pic/tongue_slice.jpg') },
+      { name: 'Short rib', image: require('./pic/USDAChoiceShortRibsSliced.jpg'), price: 0 },
+      { name: 'Sirloin', image: require('./pic/Sirloin.png'), price: 0 },
+      { name: 'Oyster Blade', image: require('./pic/Aust-WagyuOysterBlade.png'), price: 0 },
+      { name: 'Tongue Slice', image: require('./pic/TongueSlice.jpg'), price: 0 },
     ],
     Vegetable: [
-      { name: 'Water Spinach', image: require('./pic/water_spinach.jpg') },
-      { name: 'Chinese cabbage', image: require('./pic/chinese_cabbage.jpg') },
-      { name: 'Bok choy', image: require('./pic/bok_choy.jpg') },
+      { name: 'Water Spinach', image: require('./pic/WaterSpinach.jpg'), price: 0 },
+      { name: 'Chinese cabbage', image: require('./pic/ChineseCabbage.jpg'), price: 0 },
+      { name: 'Bok choy', image: require('./pic/Bokchoy.jpg'), price: 0 },
     ],
     Fried: [
-      { name: 'Water Spinach', image: require('./pic/water_spinach.jpg') },
-      { name: 'Chinese cabbage', image: require('./pic/chinese_cabbage.jpg') },
-      { name: 'Bok choy', image: require('./pic/bok_choy.jpg') },
+      { name: 'French Fries', image: require('./pic/FrenchFries.jpg'), price: 0 },
+      { name: 'Fries Chicken', image: require('./pic/FriedChicken.jpg'), price: 0 },
+      { name: 'Cheese Ball', image: require('./pic/CheeseBall.jpg'), price: 0 },
     ],
     Sweet: [
-      { name: 'Water Spinach', image: require('./pic/water_spinach.jpg') },
-      { name: 'Chinese cabbage', image: require('./pic/chinese_cabbage.jpg') },
-      { name: 'Bok choy', image: require('./pic/bok_choy.jpg') },
-    ],
-  },
-  Premium: {
-    Meat: [
-      { name: 'Aust.Wagyu Striploin', image: require('./pic/wagyu_striploin.jpg'), tag: 'Premium' },
-      { name: 'Aust.Wagyu Oyster Blade', image: require('./pic/wagyu_oyster.jpg'), tag: 'Premium' },
-      { name: 'Aust.Wagyu Karubi', image: require('./pic/wagyu_karubi.jpg'), tag: 'Premium' },
-      { name: 'Aust.Wagyu Harami', image: require('./pic/wagyu_harami.jpg'), tag: 'Premium' },
-      { name: 'Short rib', image: require('./pic/short_rib.jpg') }, // ใช้รูปซ้ำได้
-      { name: 'Sirloin', image: require('./pic/sirloin.jpg') },
-      { name: 'Oyster Blade', image: require('./pic/oyster_blade.jpg') },
-      { name: 'Tongue Slice', image: require('./pic/tongue_slice.jpg') },
-    ],
-    Vegetable: [
-      { name: 'Water Spinach', image: require('./pic/water_spinach.jpg') },
-      { name: 'Chinese cabbage', image: require('./pic/chinese_cabbage.jpg') },
-      { name: 'Bok choy', image: require('./pic/bok_choy.jpg') },
-    ],
-    Fried: [
-      { name: 'Water Spinach', image: require('./pic/water_spinach.jpg') },
-      { name: 'Chinese cabbage', image: require('./pic/chinese_cabbage.jpg') },
-      { name: 'Bok choy', image: require('./pic/bok_choy.jpg') },
-    ],
-    Sweet: [
-      { name: 'Water Spinach', image: require('./pic/water_spinach.jpg') },
-      { name: 'Chinese cabbage', image: require('./pic/chinese_cabbage.jpg') },
-      { name: 'Bok choy', image: require('./pic/bok_choy.jpg') },
+      { name: 'Ice Cream', image: require('./pic/IceCream.jpg'), price: 0 },
+      { name: 'Shave Ice', image: require('./pic/ShaveIce.jpg'), price: 0 },
+      { name: 'Soda', image: require('./pic/RaspberrySherbet.jpg'), price: 0 },
     ],
   },
 };
 
-const INITIAL_TIME_SECONDS = 2 * 60 * 60; // 2 ชั่วโมง
+// Tabs รวมถึง 'All'
 const TABS = ['All', 'Meat', 'Vegetable', 'Fried', 'Sweet'];
 
-// ------------------------------------------------------------------
-// Component: Countdown Timer
+const INITIAL_TIME_SECONDS = 60 * 60 * 2;
+
+// Component: Countdown Timer (อัปเดตใหม่)
 const formatTime = (totalSeconds) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -95,110 +69,144 @@ const CountdownTimer = () => {
   );
 };
 
-// ------------------------------------------------------------------
-// Component: ItemCard
+// ItemCard (ปรับให้รองรับ Standard Theme และเริ่มต้นที่ 0)
 const ItemCard = ({ item, theme, onQuantityChange }) => {
-  // Logic ของ Quantity ถูกอ้างอิงจาก Theme
-  const [quantity, setQuantity] = useState(item.initialQuantity || (theme === 'Standard' ? 0 : 1));
-  const isPremium = item.tag === 'Premium';
+    const [quantity, setQuantity] = useState(item.initialQuantity || 0);
 
-  const handleQuantity = useCallback((change) => {
-    setQuantity(prev => {
-      const newQty = Math.max(0, prev + change);
-      onQuantityChange(item.name, newQty);
-      return newQty;
-    });
-  }, [item.name, onQuantityChange]);
-  
-  // ในหน้า Standard ใช้เครื่องหมาย '+' ถ้าจำนวนเป็น 0
-  if (theme === 'Standard' && quantity === 0) {
-    return (
-      <View style={styles.itemCardContainer}>
-        <Image source={{ uri: item.image }} style={styles.itemImage} />
-        <View style={styles.itemDetails}>
-          <Text style={styles.itemName}>{item.name}</Text>
+    const handleAdd = () => {
+        setQuantity(q => q + 1);
+        onQuantityChange(item.name, quantity + 1);
+    };
+
+    const handleSubtract = () => {
+        // สามารถลดจำนวนลงได้จนถึง 0
+        if (quantity > 0) {
+             setQuantity(q => q - 1);
+             onQuantityChange(item.name, quantity - 1);
+        }
+    };
+
+    const isPremiumItem = item.tag === 'Premium';
+
+    // ใช้ Standard Style (สีฟ้า) สำหรับ QuantityControl
+    const QuantityControl = (
+        <View style={[styles.quantityControl, styles.standardQuantityControl]}>
+            <TouchableOpacity style={styles.controlButton} onPress={handleSubtract}>
+                <Text style={styles.controlButtonText}>-</Text>
+            </TouchableOpacity>
+            <Text style={styles.quantityText}>{quantity}</Text>
+            <TouchableOpacity style={styles.controlButton} onPress={handleAdd}>
+                <Text style={styles.controlButtonText}>+</Text>
+            </TouchableOpacity>
         </View>
-        <TouchableOpacity 
-          style={styles.addButtonStandard} 
-          onPress={() => handleQuantity(1)}
-        >
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
     );
-  }
 
-  // สำหรับ Standard (มีสินค้า) และ Premium (เพิ่ม/ลด)
-  return (
-    <View style={styles.itemCardContainer}>
-      <Image source={{ uri: item.image }} style={styles.itemImage} />
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        {isPremium && (
-          <View style={styles.premiumTag}>
-            <Text style={styles.premiumTagText}>Premium</Text>
-          </View>
-        )}
-      </View>
-      <View style={[styles.quantityControl, theme === 'Premium' ? styles.premiumQuantityControl : styles.standardQuantityControl]}>
-        <TouchableOpacity onPress={() => handleQuantity(-1)} style={styles.controlButton}>
-          <Text style={styles.controlButtonText}>-</Text>
+    // ใช้ Standard Style (สีฟ้า) สำหรับ AddButton
+    const AddButton = (
+        <TouchableOpacity style={styles.addButtonStandard} onPress={handleAdd}>
+            <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
-        <Text style={styles.quantityText}>{quantity} pcs</Text>
-        <TouchableOpacity onPress={() => handleQuantity(1)} style={styles.controlButton}>
-          <Text style={styles.controlButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+
+    return (
+        <View style={styles.itemCardContainer}>
+            <Image source={item.image} style={styles.itemImage} />
+
+            <View style={styles.itemDetails}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                {/* ไม่แสดง Tag ถ้าไม่ใช่ Premium */}
+                {isPremiumItem && (
+                    <View style={styles.premiumTag}>
+                        <Text style={styles.premiumTagText}>PREMIUM</Text>
+                    </View>
+                )}
+            </View>
+
+            {/* แสดง QuantityControl เมื่อ quantity > 0, แสดง AddButton เมื่อ quantity === 0 */}
+            {quantity > 0 ? QuantityControl : AddButton}
+        </View>
+    );
 };
 
-// ------------------------------------------------------------------
-// Component: StandardMenu (แยกหน้า)
-const StandardMenu = () => {
-  const currentTheme = 'Standard'; // <--- กำหนด Theme เป็น Standard ถาวร
-  const [selectedTab, setSelectedTab] = useState('All');
-  const [cartItems, setCartItems] = useState({}); // { itemName: quantity }
 
-  const themeStyle = styles.standardTheme;
-  const buttonColor = styles.standardButton;
+export default function StandardMenu() {
+  const currentTheme = 'Standard';
+  const [selectedTab, setSelectedTab] = useState(TABS[0]); // เริ่มต้นที่ 'All'
+  const [cartItems, setCartItems] = useState({});
+  const [totalItems, setTotalItems] = useState(0);
 
-  // สำหรับจัดการการเพิ่ม/ลดจำนวนสินค้า
-  const handleQuantityChange = useCallback((itemName, newQty) => {
-    setCartItems(prev => {
-      if (newQty > 0) {
-        return { ...prev, [itemName]: newQty };
-      }
-      const newItems = { ...prev };
-      delete newItems[itemName];
-      return newItems;
-    });
+  useEffect(() => {
+    const total = Object.values(cartItems).reduce((sum, q) => sum + q, 0);
+    setTotalItems(total);
+  }, [cartItems]);
+
+  const handleQuantityChange = useCallback((itemName, quantity) => {
+    setCartItems(prev => ({
+      ...prev,
+      [itemName]: quantity,
+    }));
   }, []);
 
-  const totalItems = Object.values(cartItems).reduce((sum, qty) => sum + qty, 0);
+  const themeStyle = styles.standardTheme;
+  const buttonColor = styles.standardButton; // ใช้ standardButton
+  const data = MENU_DATA[currentTheme]; // ดึงข้อมูล Standard
 
   const renderContent = () => {
-    const data = MENU_DATA[currentTheme];
-    const categories = Object.keys(data).filter(
-      cat => selectedTab === 'All' || selectedTab === cat
-    );
+    const category = selectedTab;
+    const initialQty = 0; // Standard เริ่มที่ 0
+    // หมวดหมู่จริงที่ต้องวนลูป (ตัด 'All' ออก)
+    const tabsForContent = TABS.filter(tab => tab !== 'All');
 
-    return categories.map(category => (
-      <View key={category} style={styles.categoryContainer}>
-        <Text style={styles.categoryTitle}>{category}</Text>
-        {data[category].map(item => (
-          <ItemCard
-            key={item.name}
-            item={{
-                ...item,
-                initialQuantity: cartItems[item.name] || (item.name === 'Short rib' || item.name === 'Sirloin' || item.name === 'Oyster Blade' || item.name === 'Tongue Slice' || item.name === 'Water Spinach' || item.name === 'Chinese cabbage' || item.name === 'Bok choy' ? (currentTheme === 'Standard' ? (cartItems[item.name] || 0) : (cartItems[item.name] || 1)) : (cartItems[item.name] || 1))
-            }}
-            theme={currentTheme}
-            onQuantityChange={handleQuantityChange}
-          />
-        ))}
-      </View>
-    ));
+    if (category === 'All') {
+        // Logic สำหรับ Tab 'All': แสดงสินค้าทั้งหมดพร้อมหัวข้อหมวดหมู่
+        return (
+            <View style={styles.categoryContainer}>
+                {tabsForContent.map(cat => {
+                    const items = data[cat];
+                    if (!items || items.length === 0) return null; // ข้ามหมวดหมู่ที่ว่างเปล่า
+
+                    return (
+                        <View key={cat} style={styles.allCategorySection}>
+                            {/* แสดงหัวข้อหมวดหมู่ */}
+                            <Text style={styles.categoryTitle}>{cat}</Text>
+
+                            {/* แสดงรายการสินค้าในหมวดหมู่นั้นๆ */}
+                            {items.map(item => (
+                                <ItemCard
+                                    key={item.name}
+                                    item={{
+                                        ...item,
+                                        initialQuantity: cartItems[item.name] || initialQty
+                                    }}
+                                    theme={currentTheme}
+                                    onQuantityChange={handleQuantityChange}
+                                />
+                            ))}
+                        </View>
+                    );
+                })}
+            </View>
+        );
+
+    } else {
+        // Logic สำหรับหมวดหมู่ปกติ (Meat, Fried, etc.)
+        const items = data[category];
+        if (!items) return <Text>No items in this category.</Text>;
+
+        return (
+            <View style={styles.categoryContainer}>
+                <Text style={styles.categoryTitle}>{category}</Text>
+                {items.map(item => (
+                    <ItemCard
+                        key={item.name}
+                        item={{...item, initialQuantity: cartItems[item.name] || initialQty}}
+                        theme={currentTheme}
+                        onQuantityChange={handleQuantityChange}
+                    />
+                ))}
+            </View>
+        );
+    }
   };
 
   return (
@@ -208,7 +216,6 @@ const StandardMenu = () => {
         <TouchableOpacity style={styles.backButton}>
           <Text style={styles.backButtonText}>{'<'}</Text>
         </TouchableOpacity>
-        {/* แสดงเฉพาะ Standard */}
         <Text style={[styles.themeText, styles.activeThemeText]}>Standard</Text>
         <CountdownTimer />
       </View>
@@ -218,9 +225,11 @@ const StandardMenu = () => {
         {TABS.map(tab => (
           <TouchableOpacity
             key={tab}
+            // ใช้ Standard Color (#5C9EAD) สำหรับ Tab ที่เลือก
             style={[styles.tabItem, selectedTab === tab && { borderBottomWidth: 2, borderBottomColor: '#5C9EAD' }]}
             onPress={() => setSelectedTab(tab)}
           >
+            {/* ใช้ Standard Color (#5C9EAD) สำหรับ Text ใน Tab ที่เลือก */}
             <Text style={[styles.tabText, selectedTab === tab && {color: '#5C9EAD', fontWeight: 'bold'}]}>{tab}</Text>
           </TouchableOpacity>
         ))}
@@ -237,7 +246,7 @@ const StandardMenu = () => {
           <Text style={styles.totalText}>Total (Items)</Text>
           <Text style={styles.totalItemsText}>{totalItems} Items</Text>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.orderButton, buttonColor]}
           onPress={() => alert(`Order ${currentTheme} with ${totalItems} items!`)}
         >
@@ -246,6 +255,4 @@ const StandardMenu = () => {
       </View>
     </View>
   );
-};
-
-export default StandardMenu;
+}

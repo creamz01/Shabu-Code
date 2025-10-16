@@ -12,6 +12,8 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     padding: 15,
     paddingTop: 40,
     borderBottomWidth: 1,
@@ -33,9 +35,11 @@ export const styles = StyleSheet.create({
     color: '#000',
   },
   themeText: {
-    fontSize: 18,
-    color: '#aaa',
-    marginHorizontal: 10,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    flex: 1,
+    textAlign: 'center',
   },
   activeThemeText: {
     color: '#000',
@@ -120,6 +124,14 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+    addButtonPremium: {
+      backgroundColor: '#D1A31C',
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   addButtonText: {
     color: '#fff',
     fontSize: 20,
